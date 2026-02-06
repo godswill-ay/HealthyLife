@@ -15,7 +15,7 @@
 - **Project Type:** Final Year Individual Project
 - **Domain:** Health & Fitness Tracking
 - **Objective:** Design and implement a functional prototype that enables users to track daily health metrics
-- **Approach:** Mobile-first development with cross-platform support (Android & Web)
+- **Approach:** Mobile-first development with cross-platform support (Android, IOS & Web)
 
 HealthyLife demonstrates practical application of **mobile app development, state management, local data persistence, and user interface design**, rather than production-scale deployment.
 
