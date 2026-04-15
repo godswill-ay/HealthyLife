@@ -1,3 +1,4 @@
+import { WaterLog, loadWater, saveWater } from "@/src/storage/water";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
@@ -7,8 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { WaterLog, loadWater, saveWater } from "@/src/storage/water";
 
+// Utility function: compares two dates so water logs can be grouped by calendar day
 function isSameDay(a: Date, b: Date) {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -17,12 +18,15 @@ function isSameDay(a: Date, b: Date) {
   );
 }
 
+// Main screen component: manages water tracking data, user input, and hydration UI
 export default function WaterScreen() {
+  // Form state: stores water input and saved hydration log entries
   const [mlInput, setMlInput] = useState("");
   const [logs, setLogs] = useState<WaterLog[]>([]);
   const hydratedRef = useRef(false);
 
   useEffect(() => {
+    // Effect: loads saved water logs when the screen is opened
     (async () => {
       const saved = await loadWater();
       setLogs(saved);
@@ -30,41 +34,60 @@ export default function WaterScreen() {
     })();
   }, []);
 
+  // Derived state: calculates today's total water intake from saved log entries
   const todayTotal = useMemo(() => {
+    // Current date: used to filter hydration entries for today only
     const now = new Date();
-    return logs
-      .filter((w) => isSameDay(new Date(w.createdAt), now))
-      .reduce((sum, w) => sum + w.ml, 0);
+    return (
+      logs
+        // Filter step: keep only water logs created on the current day
+        .filter((w) => isSameDay(new Date(w.createdAt), now))
+        // Aggregation step: sum milliliter values for today's entries
+        .reduce((sum, w) => sum + w.ml, 0)
+    );
   }, [logs]);
 
+  // Action handler: creates a new water log and persists the updated hydration list
   async function addWater() {
+    // Input parsing: convert the text field value into a numeric milliliter amount
     const n = Number(mlInput);
+    // Validation: ignore invalid, empty, or non-positive values
     if (!Number.isFinite(n) || n <= 0) return;
 
+    // New entry: create a water log object with ID, amount, and timestamp
     const log: WaterLog = {
       id: String(Date.now()),
       ml: Math.round(n),
       createdAt: Date.now(),
     };
 
+    // State update: place newest water entry at the top of the list
     const next = [log, ...logs];
     setLogs(next);
     setMlInput("");
 
+    // Persistence: save updated logs after initial hydration data has loaded
     if (hydratedRef.current) await saveWater(next);
   }
 
+  // Action handler: removes a selected water log and persists the updated list
   async function removeLog(id: string) {
+    // Filter step: remove the selected hydration entry by its unique ID
     const next = logs.filter((w) => w.id !== id);
     setLogs(next);
+    // Persistence: save the reduced list after deletion
     if (hydratedRef.current) await saveWater(next);
   }
 
   return (
     <View style={styles.container}>
+      {/* Screen layout: wraps all water tracking content on this page */}
+      {/* Screen title: identifies the current hydration tracking page */}
       <Text style={styles.title}>Water</Text>
+      {/* Daily summary: shows the total amount of water consumed today */}
       <Text style={styles.sub}>Today’s water: {todayTotal} ml</Text>
 
+      {/* Input section: allows the user to enter a water amount and save it */}
       <View style={styles.row}>
         <TextInput
           value={mlInput}
@@ -78,30 +101,41 @@ export default function WaterScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Log list: displays all saved water entries with newest items first */}
       <FlatList
         data={logs}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ gap: 10, paddingTop: 12 }}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <View style={{ gap: 4 }}>
-              <Text style={styles.itemTitle}>{item.ml} ml</Text>
-              <Text style={styles.itemMeta}>
-                {new Date(item.createdAt).toLocaleString()}
-              </Text>
+          <>
+            {/* Log item: displays one saved water entry with timestamp and actions */}
+            <View style={styles.item}>
+              <View style={{ gap: 4 }}>
+                <Text style={styles.itemTitle}>{item.ml} ml</Text>
+                <Text style={styles.itemMeta}>
+                  {new Date(item.createdAt).toLocaleString()}
+                </Text>
+              </View>
+              {/* Delete action: removes the selected water entry from the log */}
+              <TouchableOpacity
+                onPress={() => removeLog(item.id)}
+                style={styles.delete}
+              >
+                <Text style={styles.deleteText}>Delete</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity onPress={() => removeLog(item.id)} style={styles.delete}>
-              <Text style={styles.deleteText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
+          </>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>No water logs yet.</Text>}
+        // Empty state: shown when no hydration entries have been added yet
+        ListEmptyComponent={
+          <Text style={styles.empty}>No water logs yet.</Text>
+        }
       />
     </View>
   );
 }
 
+// Styles: controls layout, spacing, typography, and list appearance for the water screen
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   title: { fontSize: 24, fontWeight: "800", color: "#111827" },
