@@ -136,7 +136,7 @@ export default function LandingPage() {
                   styles.secondaryButton,
                   isMobile && styles.fullWidthButton,
                 ]}
-                onPress={() => router.push("/learn")}
+                onPress={() => router.push("/about")}
               >
                 <Text style={styles.secondaryButtonText}>Learn More</Text>
               </Pressable>
