@@ -1,4 +1,4 @@
-# HealthyLife – Fitness Tracking Application
+# HealthyLife – Nutrition Tracking Application
 
 **Final Year Project** – A cross-platform fitness tracking application developed as part of a **BSc Computer Science Final Year Project**, focusing on usability, data persistence, and health metric visualisation.
 
