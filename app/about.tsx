@@ -10,7 +10,6 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 // - Describes what HealthyLife is
 // - Explains the problem it addresses
 // - Outlines the design approach and key features
-// - Communicates the overall goal of the project
 export default function AboutPage() {
   return (
     <ScrollView
@@ -94,38 +93,42 @@ const styles = StyleSheet.create({
     backgroundColor: "#1F2544",
   },
   contentContainer: {
-    paddingBottom: 40,
+    flexGrow: 1,
+    paddingBottom: 48,
   },
   pageWrapper: {
     width: "100%",
-    maxWidth: 1400,
+    maxWidth: 1520,
     alignSelf: "center",
-    paddingHorizontal: 32,
+    paddingHorizontal: 72,
+    paddingTop: 20,
   },
   contentBox: {
     backgroundColor: "#2A3158",
     borderRadius: 28,
-    padding: 32,
-    marginTop: 20,
+    paddingVertical: 44,
+    paddingHorizontal: 44,
+    marginTop: 32,
   },
   title: {
-    fontSize: 42,
+    fontSize: 48,
     fontWeight: "800",
     color: "#FFFFFF",
-    marginBottom: 24,
+    marginBottom: 22,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "700",
     color: "#FFFFFF",
-    marginBottom: 10,
+    marginBottom: 12,
   },
   text: {
-    fontSize: 18,
-    lineHeight: 30,
+    fontSize: 19,
+    lineHeight: 31,
     color: "#E6E8F2",
+    maxWidth: 1080,
   },
 });
