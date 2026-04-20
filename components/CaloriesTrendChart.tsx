@@ -2,7 +2,7 @@
 // Renders a 7-day rolling calorie trend using an SVG line chart for visual progress tracking.
 
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import Svg, { Circle, Polyline } from "react-native-svg";
 
 // Data model: defines the structure of each data point used in the chart
@@ -28,12 +28,14 @@ function getLast7DayLabels() {
 
 // Main component: converts calorie data into visual coordinates and renders the trend chart UI
 export default function CaloriesTrendChart({ data }: { data: Point[] }) {
+  const { width: screenWidth } = useWindowDimensions();
   // Derived labels: generate weekday names for the current rolling 7-day window.
   const dynamicLabels = getLast7DayLabels();
-  // Chart dimensions: define fixed width, height, and padding for layout calculations
-  const width = 320;
-  const height = 140;
-  const padding = 16;
+  // Make the chart responsive so it uses more horizontal space on larger screens
+  // while still fitting smaller mobile layouts.
+  const width = Math.min(Math.max(screenWidth - 72, 300), 1100);
+  const height = 220;
+  const padding = 20;
 
   // Extract numeric values from dataset for scaling and rendering
   const values = data.map((d) => d.value);
@@ -83,19 +85,21 @@ export default function CaloriesTrendChart({ data }: { data: Point[] }) {
 // Styles: controls layout, spacing, typography, and chart presentation
 const styles = StyleSheet.create({
   card: {
+    width: "100%",
     borderWidth: 1,
     borderColor: "#e5e7eb",
     backgroundColor: "#f9fafb",
     borderRadius: 14,
-    padding: 14,
-    gap: 6,
+    padding: 24,
+    gap: 8,
   },
-  title: { fontSize: 16, fontWeight: "800", color: "#111827" },
-  sub: { color: "#6b7280", fontWeight: "600", marginBottom: 6 },
+  title: { fontSize: 18, fontWeight: "800", color: "#111827" },
+  sub: { color: "#6b7280", fontWeight: "600", fontSize: 14, marginBottom: 10 },
   labelsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 6,
+    marginTop: 10,
+    width: "100%",
   },
-  label: { fontSize: 11, color: "#6b7280", fontWeight: "700" },
+  label: { fontSize: 12, color: "#6b7280", fontWeight: "700" },
 });
