@@ -1,7 +1,7 @@
 // Public navigation bar used across all unauthenticated pages.
 // This component keeps branding and navigation consistent on the landing,
 // learn, about, login, and register screens.
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import React, { useState } from "react";
 import {
   Image,
@@ -31,6 +31,10 @@ export default function PublicNavbar({
   // Read the current viewport width so the navbar can switch
   // between desktop navigation and a compact mobile menu.
   const { width } = useWindowDimensions();
+
+  // Reads the current pathname so the active page can be highlighted
+  // across the public navigation.
+  const pathname = usePathname();
 
   // Screens below 768px use the mobile navigation layout.
   const isMobile = width < 768;
@@ -68,6 +72,53 @@ export default function PublicNavbar({
     router.push("/register");
   };
 
+  // Returns true when the current pathname matches the supplied public route.
+  const isActiveRoute = (route: string) => pathname === route;
+
+  // Reusable desktop navigation item with active-state styling.
+  const renderDesktopNavItem = (
+    label: string,
+    onPress: () => void,
+    route: string,
+  ) => {
+    const active = isActiveRoute(route);
+
+    return (
+      <Pressable
+        key={route}
+        onPress={onPress}
+        style={active ? styles.activeNavPill : undefined}
+      >
+        <Text style={active ? styles.activeNavText : styles.navLink}>
+          {label}
+        </Text>
+      </Pressable>
+    );
+  };
+
+  // Reusable mobile navigation item with active-state styling.
+  const renderMobileNavItem = (
+    label: string,
+    onPress: () => void,
+    route: string,
+  ) => {
+    const active = isActiveRoute(route);
+
+    return (
+      <Pressable
+        key={route}
+        onPress={onPress}
+        style={active ? styles.mobileActiveNavPill : undefined}
+      >
+        <Text
+          style={active ? styles.mobileActiveNavText : styles.mobileNavLink}
+        >
+          {label}
+        </Text>
+      </Pressable>
+    );
+  };
+
   // Render shared navbar layout.
   // Desktop users see inline navigation, while mobile users see a menu toggle.
   return (
@@ -97,25 +148,16 @@ export default function PublicNavbar({
             <>
               {/* Desktop navigation: links remain visible in the top bar. */}
               <View style={styles.desktopNav}>
-                <Pressable onPress={goLearn}>
-                  <Text style={styles.navLink}>Learn</Text>
-                </Pressable>
-
-                <Pressable onPress={goAbout}>
-                  <Text style={styles.navLink}>About</Text>
-                </Pressable>
+                {renderDesktopNavItem("Home", goHome, "/")}
+                {renderDesktopNavItem("Learn", goLearn, "/learn")}
+                {renderDesktopNavItem("About", goAbout, "/about")}
 
                 {/* Auth actions are optional so the same navbar can be reused on pages
                     where sign-in and sign-up buttons are needed. */}
                 {showAuthButtons && (
                   <>
-                    <Pressable onPress={goLogin}>
-                      <Text style={styles.navLink}>Sign In</Text>
-                    </Pressable>
-
-                    <Pressable style={styles.signUpButton} onPress={goRegister}>
-                      <Text style={styles.signUpText}>Sign Up</Text>
-                    </Pressable>
+                    {renderDesktopNavItem("Sign In", goLogin, "/login")}
+                    {renderDesktopNavItem("Sign Up", goRegister, "/register")}
                   </>
                 )}
               </View>
@@ -127,24 +169,15 @@ export default function PublicNavbar({
           It is hidden completely in minimal mode. */}
       {!minimal && isMobile && menuOpen && (
         <View style={styles.mobileMenu}>
-          <Pressable onPress={goLearn}>
-            <Text style={styles.mobileNavLink}>Learn</Text>
-          </Pressable>
-
-          <Pressable onPress={goAbout}>
-            <Text style={styles.mobileNavLink}>About</Text>
-          </Pressable>
+          {renderMobileNavItem("Home", goHome, "/")}
+          {renderMobileNavItem("Learn", goLearn, "/learn")}
+          {renderMobileNavItem("About", goAbout, "/about")}
 
           {/* Auth actions are repeated inside the mobile dropdown for smaller screens. */}
           {showAuthButtons && (
             <>
-              <Pressable onPress={goLogin}>
-                <Text style={styles.mobileNavLink}>Sign In</Text>
-              </Pressable>
-
-              <Pressable style={styles.mobileSignUpButton} onPress={goRegister}>
-                <Text style={styles.mobileSignUpText}>Sign Up</Text>
-              </Pressable>
+              {renderMobileNavItem("Sign In", goLogin, "/login")}
+              {renderMobileNavItem("Sign Up", goRegister, "/register")}
             </>
           )}
         </View>
@@ -190,14 +223,14 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "500",
   },
-  signUpButton: {
+  activeNavPill: {
     borderWidth: 1,
     borderColor: "#FFFFFF",
     borderRadius: 999,
     paddingVertical: 10,
     paddingHorizontal: 18,
   },
-  signUpText: {
+  activeNavText: {
     fontSize: 16,
     color: "#FFFFFF",
     fontWeight: "600",
@@ -226,15 +259,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  mobileSignUpButton: {
-    marginTop: 4,
+  mobileActiveNavPill: {
     borderWidth: 1,
     borderColor: "#FFFFFF",
     borderRadius: 999,
     paddingVertical: 12,
+    paddingHorizontal: 14,
     alignItems: "center",
   },
-  mobileSignUpText: {
+  mobileActiveNavText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",

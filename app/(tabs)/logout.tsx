@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-// Main screen component: triggers logout on mount and handles navigation flow
+// Main screen component: triggers logout and handles navigation flow
 export default function LogoutScreen() {
   const router = useRouter();
 

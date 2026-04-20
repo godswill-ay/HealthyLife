@@ -79,10 +79,10 @@ export default function RegisterScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.pageWrapper}>
-        {/* Minimal Navbar:
-            Shows only branding so the registration screen stays focused.
-            Clicking the logo still allows the user to return to the landing page. */}
-        <PublicNavbar minimal />
+        {/* Shared public navbar:
+            Shows the full navigation so the current Sign Up page can be
+            highlighted consistently with the other public pages. */}
+        <PublicNavbar showAuthButtons />
 
         {/* Centered form container used to position the registration card on the page. */}
         <View style={styles.formSection}>

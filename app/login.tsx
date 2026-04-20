@@ -56,10 +56,10 @@ export default function LoginScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.pageWrapper}>
-        {/* Minimal Navbar:
-            Only shows branding (logo + app name).
-            Keeps authentication pages focused by removing navigation links. */}
-        <PublicNavbar minimal />
+        {/* Shared public navbar:
+            Shows the full navigation so the current Sign In page can be
+            highlighted consistently with the other public pages. */}
+        <PublicNavbar showAuthButtons />
 
         {/* Centered form container for login inputs and actions */}
         <View style={styles.formSection}>
