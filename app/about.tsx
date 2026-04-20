@@ -153,6 +153,39 @@ export default function AboutPage() {
             </Text>
           </View>
 
+          {/* Section: Differentiation */}
+          <View style={styles.section}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                {
+                  fontSize: isMobile ? 22 : 26,
+                  marginBottom: isMobile ? 10 : 12,
+                },
+              ]}
+            >
+              Why It Feels Different
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                {
+                  fontSize: isMobile ? 17 : 19,
+                  lineHeight: isMobile ? 28 : 31,
+                  maxWidth: "100%",
+                },
+              ]}
+            >
+              HealthyLife is designed with simplicity, privacy, and
+              accessibility in mind. Unlike many modern health applications that
+              rely on subscriptions, cloud storage, or complex dashboards,
+              HealthyLife focuses on essential tracking features and stores user
+              data locally on the device. This makes the application
+              lightweight, easy to use, and more privacy-conscious for everyday
+              users.
+            </Text>
+          </View>
+
           {/* Section: Features summary */}
           <View style={styles.section}>
             <Text

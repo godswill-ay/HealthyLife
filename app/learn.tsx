@@ -82,6 +82,38 @@ export default function LearnPage() {
             review progress more confidently.
           </Text>
 
+          {/* Feature guide: goal setting */}
+          <View style={styles.section}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                {
+                  fontSize: isMobile ? 22 : 26,
+                  marginBottom: isMobile ? 10 : 12,
+                },
+              ]}
+            >
+              Set Your Daily Goals First
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                {
+                  fontSize: isMobile ? 17 : 19,
+                  lineHeight: isMobile ? 28 : 31,
+                  maxWidth: "100%",
+                },
+              ]}
+            >
+              Before logging meals or water intake, users can set their daily
+              calorie and hydration goals directly from the Dashboard. Simply
+              enter your preferred calorie target and water goal (in
+              millilitres), then press the Save Goals button. Setting these
+              targets first helps you track your progress more effectively and
+              gives meaning to the data you log throughout the day.
+            </Text>
+          </View>
+
           {/* Feature guide: meal tracking */}
           <View style={styles.section}>
             <Text
