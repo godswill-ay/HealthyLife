@@ -23,7 +23,7 @@ import { getTodayCaloriesTotal } from "@/src/storage/meals";
 import { getLast7DaysCalories } from "@/src/storage/stats";
 import { getTodayWaterTotalMl } from "@/src/storage/water";
 
-// Returns a time-based greeting so the dashboard feels more personalised.
+// Returns a time-based greeting.
 function getGreeting(now: Date) {
   const h = now.getHours();
   if (h < 12) return "Good morning";
@@ -76,7 +76,9 @@ export default function DashboardScreen() {
   const [waterTodayMl, setWaterTodayMl] = useState(0);
   const [bmiStatus, setBmiStatus] = useState("Not calculated");
   const [trend, setTrend] = useState<{ label: string; value: number }[]>([]);
-  const [showTrend, setShowTrend] = useState(true);
+  // Keep the calorie trend collapsed by default so new users first see a
+  // simpler dashboard state. The section can be expanded with the Show action.
+  const [showTrend, setShowTrend] = useState(false);
 
   // Goal input state: allows users to view and update daily calorie and water targets.
   const [calGoal, setCalGoal] = useState("2000");

@@ -1,8 +1,8 @@
 // Calories trend chart component for HealthyLife.
 // Renders a 7-day rolling calorie trend using an SVG line chart for visual progress tracking.
 
-import React from "react";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import React, { useState } from "react";
+import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Polyline } from "react-native-svg";
 
 // Data model: defines the structure of each data point used in the chart
@@ -28,18 +28,28 @@ function getLast7DayLabels() {
 
 // Main component: converts calorie data into visual coordinates and renders the trend chart UI
 export default function CaloriesTrendChart({ data }: { data: Point[] }) {
-  const { width: screenWidth } = useWindowDimensions();
+  const [cardWidth, setCardWidth] = useState(0);
+
   // Derived labels: generate weekday names for the current rolling 7-day window.
   const dynamicLabels = getLast7DayLabels();
-  // Make the chart responsive so it uses more horizontal space on larger screens
-  // while still fitting smaller mobile layouts.
-  const width = Math.min(Math.max(screenWidth - 72, 300), 1100);
+
   const height = 220;
   const padding = 20;
+  const horizontalCardPadding = 48; // 24 left + 24 right from styles.card
+  const width = Math.max(cardWidth - horizontalCardPadding, 300);
 
   // Extract numeric values from dataset for scaling and rendering
   const values = data.map((d) => d.value);
   const maxV = maxOrOne(values);
+
+  const formatCalories = (value: number) => `${value} kcal`;
+
+  const handleCardLayout = (event: LayoutChangeEvent) => {
+    const measuredWidth = event.nativeEvent.layout.width;
+    if (measuredWidth > 0 && measuredWidth !== cardWidth) {
+      setCardWidth(measuredWidth);
+    }
+  };
 
   // Compute usable drawing area by removing padding from total dimensions
   const usableW = width - padding * 2;
@@ -56,25 +66,46 @@ export default function CaloriesTrendChart({ data }: { data: Point[] }) {
   const poly = pts.map((p) => `${p.x},${p.y}`).join(" ");
 
   return (
-    <View style={styles.card}>
-      {/* Chart title: indicates the purpose of the visualised data */}
-      <Text style={styles.title}>7-day Calories Trend</Text>
-      {/* Chart description: explains what the data represents */}
-      <Text style={styles.sub}>Daily total calories (last 7 days)</Text>
+    <View style={styles.card} onLayout={handleCardLayout}>
+      <View style={styles.headerRow}>
+        <View style={styles.headerTextBlock}>
+          {/* Chart title: indicates the purpose of the visualised data */}
+          <Text style={styles.title}>7-day Calories Trend</Text>
+          {/* Chart description: explains what the data represents */}
+          <Text style={styles.sub}>Daily total calories (last 7 days)</Text>
+        </View>
+      </View>
 
       {/* SVG chart: renders the calorie trend line and data points */}
-      <Svg width={width} height={height}>
-        <Polyline points={poly} fill="none" stroke="#111827" strokeWidth="3" />
-        {pts.map((p, idx) => (
-          <Circle key={idx} cx={p.x} cy={p.y} r="4" fill="#111827" />
-        ))}
-      </Svg>
+      {cardWidth > 0 && (
+        <Svg width={width} height={height}>
+          <Polyline
+            points={poly}
+            fill="none"
+            stroke="#111827"
+            strokeWidth="3"
+          />
+          {pts.map((p, idx) => (
+            <Circle key={idx} cx={p.x} cy={p.y} r="4" fill="#111827" />
+          ))}
+        </Svg>
+      )}
 
       {/* X-axis labels: displays weekday names for the rolling 7-day period */}
       <View style={styles.labelsRow}>
         {data.map((d, idx) => (
           <Text key={`${d.label}-${idx}`} style={styles.label}>
             {dynamicLabels[idx] ?? d.label}
+          </Text>
+        ))}
+      </View>
+
+      {/* Daily calorie values: helps users match each trend point to the
+          actual calorie total recorded on that date. */}
+      <View style={styles.valuesRow}>
+        {data.map((d, idx) => (
+          <Text key={`value-${d.label}-${idx}`} style={styles.valueLabel}>
+            {formatCalories(d.value)}
           </Text>
         ))}
       </View>
@@ -93,6 +124,15 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 8,
   },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  headerTextBlock: {
+    flex: 1,
+  },
   title: { fontSize: 18, fontWeight: "800", color: "#111827" },
   sub: { color: "#6b7280", fontWeight: "600", fontSize: 14, marginBottom: 10 },
   labelsRow: {
@@ -101,5 +141,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: "100%",
   },
-  label: { fontSize: 12, color: "#6b7280", fontWeight: "700" },
+  label: {
+    fontSize: 12,
+    color: "#6b7280",
+    fontWeight: "700",
+    flex: 1,
+    textAlign: "center",
+  },
+  valuesRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 8,
+  },
+  valueLabel: {
+    fontSize: 11,
+    color: "#111827",
+    fontWeight: "700",
+    flex: 1,
+    textAlign: "center",
+  },
 });
