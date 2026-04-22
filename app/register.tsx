@@ -5,6 +5,7 @@
 // Expo Router handles navigation between authentication screens and the main app.
 import PublicNavbar from "@/components/public-navbar";
 import { registerUser } from "@/src/storage/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -66,6 +67,16 @@ export default function RegisterScreen() {
 
     // If registration fails, show the returned error message to the user.
     if (!res.ok) return setMsg(res.error);
+
+    // Mirror the newly registered user's basic profile under a dedicated key
+    // so other UI areas can read and update profile details consistently.
+    await AsyncStorage.setItem(
+      "userProfile",
+      JSON.stringify({
+        name: name.trim(),
+        email: email.trim(),
+      }),
+    );
 
     // Successful registration: move the user directly into the main app flow.
     // `replace` avoids leaving the register screen in the back navigation stack.

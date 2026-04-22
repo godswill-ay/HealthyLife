@@ -1,7 +1,6 @@
 // Dashboard screen for the main authenticated area of HealthyLife.
 // Summarises key daily health metrics, displays calorie trend data,
 // and provides quick access to the app's main tracking features.
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
@@ -16,11 +15,12 @@ import {
 import { Link } from "expo-router";
 
 import CaloriesTrendChart from "@/components/CaloriesTrendChart";
-import { getCurrentUser } from "@/src/storage/auth";
+import ProfileCard from "@/components/ProfileCard";
 import { loadLastBmi } from "@/src/storage/bmi";
 import { loadGoals, saveGoals } from "@/src/storage/goals";
 import { getTodayCaloriesTotal } from "@/src/storage/meals";
 import { getLast7DaysCalories } from "@/src/storage/stats";
+import { getUserProfile } from "@/src/storage/storage";
 import { getTodayWaterTotalMl } from "@/src/storage/water";
 
 // Returns a time-based greeting.
@@ -88,18 +88,50 @@ export default function DashboardScreen() {
     waterTargetMl: 2000,
   });
 
-  // Load current user details and any previously saved goals when the dashboard opens.
+  // Load the editable profile name and saved goals when the dashboard opens.
   useEffect(() => {
-    (async () => {
-      // Retrieve the active user so the greeting can display their name.
-      const user = await getCurrentUser();
-      setUserName(user?.name ?? "");
+    let alive = true;
+
+    async function loadHeaderData() {
+      // Read the editable profile so the greeting reflects the latest saved name.
+      const profile = await getUserProfile();
       // Load saved daily targets so dashboard progress can be calculated correctly.
       const g = await loadGoals();
+
+      if (!alive) return;
+
+      setUserName(profile?.name ?? "");
       setSavedGoals(g);
       setCalGoal(String(g.caloriesTarget));
       setWaterGoal(String(g.waterTargetMl));
-    })();
+    }
+
+    loadHeaderData();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Poll the stored profile name so the greeting updates live after inline
+  // profile edits made from the dashboard ProfileCard.
+  useEffect(() => {
+    let alive = true;
+
+    async function refreshProfileName() {
+      const profile = await getUserProfile();
+      if (alive) {
+        setUserName(profile?.name ?? "");
+      }
+    }
+
+    refreshProfileName();
+    const id = setInterval(refreshProfileName, 1000);
+
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
   }, []);
 
   // Load live dashboard data (calories, water, BMI, and chart values).
@@ -264,6 +296,11 @@ export default function DashboardScreen() {
             <Text style={styles.buttonText}>Calculate BMI</Text>
           </TouchableOpacity>
         </Link>
+      </View>
+
+      {/* Profile section placed at the bottom of the dashboard */}
+      <View style={styles.section}>
+        <ProfileCard />
       </View>
     </ScrollView>
   );

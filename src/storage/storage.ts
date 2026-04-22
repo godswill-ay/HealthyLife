@@ -22,3 +22,38 @@ export async function getJSON<T>(key: string, fallback: T): Promise<T> {
     return fallback;
   }
 }
+
+// ==========================
+// User Profile Help
+// ==========================
+
+export const USER_PROFILE_KEY = "userProfile";
+
+export type UserProfile = {
+  name: string;
+  email: string;
+};
+
+// Get user profile
+export async function getUserProfile(): Promise<UserProfile | null> {
+  return getJSON<UserProfile | null>(USER_PROFILE_KEY, null);
+}
+
+// Set user profile (overwrite)
+export async function setUserProfile(profile: UserProfile): Promise<void> {
+  await setJSON(USER_PROFILE_KEY, profile);
+}
+
+// Update user profile (merge)
+export async function updateUserProfile(
+  patch: Partial<UserProfile>,
+): Promise<UserProfile | null> {
+  const current = await getUserProfile();
+
+  if (!current) return null;
+
+  const updated = { ...current, ...patch };
+  await setUserProfile(updated);
+
+  return updated;
+}
