@@ -1,3 +1,9 @@
+## 🌐 Live Demo
+
+👉 https://healthy-life-sigma.vercel.app
+
+This is the deployed web version of the HealthyLife application, allowing users to interact with all core features directly in the browser.
+
 # HealthyLife – Personal Health Tracking Application
 
 **Final Year Project (BSc Computer Science)**  
