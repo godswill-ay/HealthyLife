@@ -28,9 +28,10 @@ export default function MealsScreen() {
   const [nameInput, setNameInput] = useState("");
   const [caloriesInput, setCaloriesInput] = useState("");
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [msg, setMsg] = useState("");
   const hydratedRef = useRef(false);
 
-  // Effect: loads stored meals from local storage when component mounts
+  // Effect: loads stored meals from local storage
   useEffect(() => {
     (async () => {
       const saved = await loadMeals();
@@ -39,7 +40,7 @@ export default function MealsScreen() {
     })();
   }, []);
 
-  // Derived state: calculates total calories consumed for the current day
+  // calculates total calories consumed for the current day
   const todayTotal = useMemo(() => {
     // Get current date for filtering today's meals
     const now = new Date();
@@ -59,10 +60,27 @@ export default function MealsScreen() {
     // Trim meal name input to remove unnecessary whitespace
     const name = nameInput.trim();
 
-    // Ignore empty meal names
-    if (!name) return;
-    // Ignore invalid or non-positive calorie values
-    if (!Number.isFinite(n) || n <= 0) return;
+    // Validation: require both meal name and calories before saving
+    if (!name && !caloriesInput.trim()) {
+      setMsg("Please enter a food name and calorie value.");
+      return;
+    }
+
+    if (!name) {
+      setMsg("Please enter a food name.");
+      return;
+    }
+
+    if (!caloriesInput.trim()) {
+      setMsg("Please enter a calorie value.");
+      return;
+    }
+
+    // Validation: reject invalid or non-positive calorie values
+    if (!Number.isFinite(n) || n <= 0) {
+      setMsg("Please enter a valid calorie value greater than 0.");
+      return;
+    }
 
     // Create new meal object with unique ID and timestamp
     const meal: Meal = {
@@ -77,6 +95,7 @@ export default function MealsScreen() {
     setMeals(next);
     setNameInput("");
     setCaloriesInput("");
+    setMsg("");
 
     // Persist updated meal list after initial load completes
     if (hydratedRef.current) await saveMeals(next);
@@ -96,12 +115,16 @@ export default function MealsScreen() {
       <Text style={styles.title}>Meals</Text>
       {/* Summary: shows total calories consumed today */}
       <Text style={styles.sub}>Today’s calories: {todayTotal}</Text>
+      {msg ? <Text style={styles.error}>{msg}</Text> : null}
 
       {/* Input section: captures meal name */}
       <View style={styles.row}>
         <TextInput
           value={nameInput}
-          onChangeText={setNameInput}
+          onChangeText={(text) => {
+            setNameInput(text);
+            if (msg) setMsg("");
+          }}
           placeholder="Food name (e.g. Chicken wrap)"
           style={styles.input}
         />
@@ -111,7 +134,10 @@ export default function MealsScreen() {
       <View style={styles.row}>
         <TextInput
           value={caloriesInput}
-          onChangeText={setCaloriesInput}
+          onChangeText={(text) => {
+            setCaloriesInput(text);
+            if (msg) setMsg("");
+          }}
           placeholder="Calories (e.g. 450)"
           keyboardType="numeric"
           style={styles.input}
@@ -162,6 +188,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   title: { fontSize: 24, fontWeight: "800", color: "#111827" },
   sub: { marginTop: 6, color: "#6b7280", fontWeight: "600" },
+  error: { marginTop: 8, color: "#b91c1c", fontWeight: "600" },
   row: { flexDirection: "row", gap: 10, marginTop: 10 },
   input: {
     flex: 1,

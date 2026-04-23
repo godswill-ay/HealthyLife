@@ -68,7 +68,7 @@ export default function RegisterScreen() {
     // If registration fails, show the returned error message to the user.
     if (!res.ok) return setMsg(res.error);
 
-    // Mirror the newly registered user's basic profile under a dedicated key
+    // Mirrors the newly registered user's basic profile under a dedicated key
     // so other UI areas can read and update profile details consistently.
     await AsyncStorage.setItem(
       "userProfile",

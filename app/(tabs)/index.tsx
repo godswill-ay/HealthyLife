@@ -135,7 +135,6 @@ export default function DashboardScreen() {
   }, []);
 
   // Load live dashboard data (calories, water, BMI, and chart values).
-  // A small polling interval is used so recent changes appear without requiring manual refresh.
   useEffect(() => {
     let alive = true;
 

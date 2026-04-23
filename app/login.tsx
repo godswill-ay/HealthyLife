@@ -39,6 +39,12 @@ export default function LoginScreen() {
   async function onLogin() {
     setMsg(""); // Clear previous error messages
 
+    // Validate that both fields are filled before checking stored users
+    if (!email.trim() || !password.trim()) {
+      setMsg("Please fill in all fields.");
+      return;
+    }
+
     // Call authentication function to verify credentials
     const res = await loginUser({ email, password });
 

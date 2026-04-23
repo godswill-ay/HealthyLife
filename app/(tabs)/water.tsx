@@ -23,10 +23,11 @@ export default function WaterScreen() {
   // Form state: stores water input and saved hydration log entries
   const [mlInput, setMlInput] = useState("");
   const [logs, setLogs] = useState<WaterLog[]>([]);
+  const [msg, setMsg] = useState("");
   const hydratedRef = useRef(false);
 
   useEffect(() => {
-    // Effect: loads saved water logs when the screen is opened
+    // Effect loads saved water logs when the screen is opened
     (async () => {
       const saved = await loadWater();
       setLogs(saved);
@@ -47,32 +48,41 @@ export default function WaterScreen() {
     );
   }, [logs]);
 
-  // Action handler: creates a new water log and persists the updated hydration list
+  // creates a new water log and persists the updated hydration list
   async function addWater() {
     // Input parsing: convert the text field value into a numeric milliliter amount
     const n = Number(mlInput);
-    // Validation: ignore invalid, empty, or non-positive values
-    if (!Number.isFinite(n) || n <= 0) return;
+    // Validation: reject invalid, empty, or non-positive values with visible feedback
+    if (!mlInput.trim()) {
+      setMsg("Please enter a water amount.");
+      return;
+    }
 
-    // New entry: create a water log object with ID, amount, and timestamp
+    if (!Number.isFinite(n) || n <= 0) {
+      setMsg("Please enter a valid water amount greater than 0.");
+      return;
+    }
+
+    // create a water log object with ID, amount, and timestamp
     const log: WaterLog = {
       id: String(Date.now()),
       ml: Math.round(n),
       createdAt: Date.now(),
     };
 
-    // State update: place newest water entry at the top of the list
+    // place newest water entry at the top of the list
     const next = [log, ...logs];
     setLogs(next);
     setMlInput("");
+    setMsg("");
 
-    // Persistence: save updated logs after initial hydration data has loaded
+    // save updated logs after initial hydration data has loaded
     if (hydratedRef.current) await saveWater(next);
   }
 
-  // Action handler: removes a selected water log and persists the updated list
+  //removes a selected water log and persists the updated list
   async function removeLog(id: string) {
-    // Filter step: remove the selected hydration entry by its unique ID
+    // remove the selected hydration entry by its unique ID
     const next = logs.filter((w) => w.id !== id);
     setLogs(next);
     // Persistence: save the reduced list after deletion
@@ -86,12 +96,16 @@ export default function WaterScreen() {
       <Text style={styles.title}>Water</Text>
       {/* Daily summary: shows the total amount of water consumed today */}
       <Text style={styles.sub}>Today’s water: {todayTotal} ml</Text>
+      {msg ? <Text style={styles.error}>{msg}</Text> : null}
 
       {/* Input section: allows the user to enter a water amount and save it */}
       <View style={styles.row}>
         <TextInput
           value={mlInput}
-          onChangeText={setMlInput}
+          onChangeText={(text) => {
+            setMlInput(text);
+            if (msg) setMsg("");
+          }}
           placeholder="Milliliters (e.g. 250)"
           keyboardType="numeric"
           style={styles.input}
@@ -140,6 +154,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: "#fff" },
   title: { fontSize: 24, fontWeight: "800", color: "#111827" },
   sub: { marginTop: 6, color: "#6b7280", fontWeight: "600" },
+  error: { marginTop: 8, color: "#b91c1c", fontWeight: "600" },
   row: { flexDirection: "row", gap: 10, marginTop: 14 },
   input: {
     flex: 1,
